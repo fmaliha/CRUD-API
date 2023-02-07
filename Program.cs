@@ -1,23 +1,30 @@
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using PatientInfoAPI.Data;
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddDbContext<PatientInfoAPIContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("PatientInfoAPIContext") ?? throw new InvalidOperationException("Connection string 'PatientInfoAPIContext' not found.")));
 
 // Add services to the container.
-builder.Services.AddControllersWithViews();
+
+builder.Services.AddControllers();
+// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment())
 {
-    app.UseExceptionHandler("/Home/Error");
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
-app.UseStaticFiles();
 
-app.UseRouting();
+app.UseHttpsRedirection();
 
 app.UseAuthorization();
 
-app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=PatientListController}/{action=Index}");
+app.MapControllers();
 
 app.Run();
